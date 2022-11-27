@@ -1,4 +1,4 @@
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const jwt = require('jsonwebtoken');
 const express = require('express');
 const cors = require('cors');
@@ -55,7 +55,7 @@ const run = async () => {
       }
     });
 
-    app.get('/category/:id', async (req, res) => {
+    app.get('/category/:id', verifyJWT, async (req, res) => {
       const id = req.params.id;
       const query = { category: id };
       const cars = await carsCollection.find(query).toArray();
@@ -73,6 +73,21 @@ const run = async () => {
       const email = req.query.email;
       const token = jwt.sign({ email }, process.env.PRIVATE_KEY, { expiresIn: '24h' });
       res.send({ accessToken: token });
+    });
+
+    app.patch('/advertisements/:id', async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: ObjectId(id) };
+      const options = { upsert: true };
+
+      const updateDoc = {
+        $set: {
+          advertise: true,
+        },
+      };
+
+      const result = await carsCollection.updateOne(filter, updateDoc, options);
+      res.send(result);
     });
 
     app.post('/users', async (req, res) => {
