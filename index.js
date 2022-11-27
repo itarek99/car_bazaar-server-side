@@ -57,7 +57,9 @@ const run = async () => {
 
     app.get('/category/:id', async (req, res) => {
       const id = req.params.id;
-      console.log(id);
+      const query = { category: id };
+      const cars = await carsCollection.find(query).toArray();
+      res.send(cars);
     });
 
     app.get('/users/seller/:email', async (req, res) => {
@@ -69,14 +71,8 @@ const run = async () => {
 
     app.get('/jwt', async (req, res) => {
       const email = req.query.email;
-      const user = await userCollection.findOne({ email: email });
-
-      if (user) {
-        const token = jwt.sign({ email }, process.env.PRIVATE_KEY, { expiresIn: '24h' });
-        res.send({ accessToken: token });
-      } else {
-        res.status(403).send({ accessToken: '' });
-      }
+      const token = jwt.sign({ email }, process.env.PRIVATE_KEY, { expiresIn: '24h' });
+      res.send({ accessToken: token });
     });
 
     app.post('/users', async (req, res) => {
@@ -97,7 +93,7 @@ const run = async () => {
 
 run().catch((err) => console.error(err));
 
-app.get('/', (req, res) => {
+app.get('/', (_, res) => {
   res.send('Car Bazar Server Running!');
 });
 
