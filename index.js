@@ -102,6 +102,26 @@ const run = async () => {
       res.send(sellers);
     });
 
+    app.delete('/all-sellers/:id', verifyJWT, async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await userCollection.deleteOne(query);
+      res.send(result);
+    });
+
+    app.get('/all-buyers', verifyJWT, async (req, res) => {
+      const query = { role: 'buyer' };
+      const sellers = await userCollection.find(query).toArray();
+      res.send(sellers);
+    });
+
+    app.delete('/all-buyers/:id', verifyJWT, async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await userCollection.deleteOne(query);
+      res.send(result);
+    });
+
     app.post('/bookings', async (req, res) => {
       const bookingData = req.body;
       const result = await bookingsCollection.insertOne(bookingData);
