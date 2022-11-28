@@ -58,15 +58,22 @@ const run = async () => {
 
     app.get('/category/:id', verifyJWT, async (req, res) => {
       const id = req.params.id;
-      const query = { category: id };
+      const query = { category: id, status: 'available' };
       const cars = await carsCollection.find(query).toArray();
       res.send(cars);
     });
 
     app.get('/advertised-products', async (req, res) => {
-      const query = { advertise: true };
+      const query = { advertise: true, status: 'available' };
       const advertisedProduct = await carsCollection.find(query).toArray();
       res.send(advertisedProduct);
+    });
+
+    app.get('/my-orders', verifyJWT, async (req, res) => {
+      const email = req.decoded.email;
+      const query = { buyerEmail: email };
+      const result = await bookingsCollection.find(query).toArray();
+      res.send(result);
     });
 
     app.get('/users/seller/:email', async (req, res) => {
@@ -74,6 +81,13 @@ const run = async () => {
       const filter = { email };
       const user = await userCollection.findOne(filter);
       res.send({ isSeller: user?.role === 'seller' });
+    });
+
+    app.get('/users/admin/:email', async (req, res) => {
+      const email = req.params.email;
+      const filter = { email };
+      const user = await userCollection.findOne(filter);
+      res.send({ isAdmin: user?.role === 'admin' });
     });
 
     app.get('/jwt', async (req, res) => {
@@ -85,7 +99,7 @@ const run = async () => {
     app.post('/bookings', async (req, res) => {
       const bookingData = req.body;
       const result = await bookingsCollection.insertOne(bookingData);
-      res.send(result);
+      res.send({ ...result, id: bookingData.productId });
     });
 
     app.patch('/advertisements/:id', async (req, res) => {
@@ -96,6 +110,21 @@ const run = async () => {
       const updateDoc = {
         $set: {
           advertise: true,
+        },
+      };
+
+      const result = await carsCollection.updateOne(filter, updateDoc, options);
+      res.send(result);
+    });
+
+    app.patch('/booked-status', async (req, res) => {
+      const id = req.query.productId;
+      const filter = { _id: ObjectId(id) };
+      const options = { upsert: true };
+
+      const updateDoc = {
+        $set: {
+          status: 'booked',
         },
       };
 
