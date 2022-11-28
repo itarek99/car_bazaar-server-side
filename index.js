@@ -39,6 +39,7 @@ const run = async () => {
   try {
     const userCollection = client.db('carBazaar').collection('users');
     const carsCollection = client.db('carBazaar').collection('cars');
+    const bookingsCollection = client.db('carBazaar').collection('bookings');
 
     app.get('/my-advertisements', verifyJWT, async (req, res) => {
       const decodedEmail = req.decoded.email;
@@ -79,6 +80,12 @@ const run = async () => {
       const email = req.query.email;
       const token = jwt.sign({ email }, process.env.PRIVATE_KEY, { expiresIn: '24h' });
       res.send({ accessToken: token });
+    });
+
+    app.post('/bookings', async (req, res) => {
+      const bookingData = req.body;
+      const result = await bookingsCollection.insertOne(bookingData);
+      res.send(result);
     });
 
     app.patch('/advertisements/:id', async (req, res) => {
