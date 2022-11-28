@@ -96,6 +96,12 @@ const run = async () => {
       res.send({ accessToken: token });
     });
 
+    app.get('/all-sellers', verifyJWT, async (req, res) => {
+      const query = { role: 'seller' };
+      const sellers = await userCollection.find(query).toArray();
+      res.send(sellers);
+    });
+
     app.post('/bookings', async (req, res) => {
       const bookingData = req.body;
       const result = await bookingsCollection.insertOne(bookingData);
