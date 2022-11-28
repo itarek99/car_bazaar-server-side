@@ -51,7 +51,7 @@ const run = async () => {
         const myAdvertisements = await carsCollection.find(query).toArray();
         res.send(myAdvertisements);
       } else {
-        res.status(403).send({ message: 'forbidden access for getting data' });
+        res.status(403).send({ message: 'forbidden access' });
       }
     });
 
@@ -60,6 +60,12 @@ const run = async () => {
       const query = { category: id };
       const cars = await carsCollection.find(query).toArray();
       res.send(cars);
+    });
+
+    app.get('/advertised-products', async (req, res) => {
+      const query = { advertise: true };
+      const advertisedProduct = await carsCollection.find(query).toArray();
+      res.send(advertisedProduct);
     });
 
     app.get('/users/seller/:email', async (req, res) => {
@@ -87,6 +93,14 @@ const run = async () => {
       };
 
       const result = await carsCollection.updateOne(filter, updateDoc, options);
+      res.send(result);
+    });
+
+    app.delete('/advertisements/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+
+      const result = await carsCollection.deleteOne(query);
       res.send(result);
     });
 
